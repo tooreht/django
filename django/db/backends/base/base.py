@@ -565,6 +565,12 @@ class BaseDatabaseWrapper(object):
         """
         return utils.CursorWrapper(cursor, self)
 
+    def chunked_cursor(self):
+        """
+        Returns a cursor which is used for chunked server-side iterators.
+        """
+        return self.cursor()
+
     @contextmanager
     def temporary_connection(self):
         """

@@ -204,6 +204,9 @@ class Query(object):
 
         self.context = {}
 
+        # Disable chunked_fetch per default for backwards compatibility.
+        self.chunked_fetch = False
+
     @property
     def extra(self):
         if self._extra is None:
@@ -320,6 +323,7 @@ class Query(object):
         else:
             obj.used_aliases = set()
         obj.filter_is_sticky = False
+        obj.chunked_fetch = self.chunked_fetch
         obj.subquery = self.subquery
         if 'alias_prefix' in self.__dict__:
             obj.alias_prefix = self.alias_prefix

@@ -144,6 +144,10 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     introspection_class = DatabaseIntrospection
     ops_class = DatabaseOperations
 
+    def __init__(self):
+        super(DatabaseWrapper, self).__init__(*args, **kwargs)
+        self._named_cursor_idx = 0
+
     def get_connection_params(self):
         settings_dict = self.settings_dict
         # None may be used to connect to the default 'postgres' db
@@ -205,10 +209,17 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             if not self.get_autocommit():
                 self.connection.commit()
 
-    def create_cursor(self):
-        cursor = self.connection.cursor()
+    def create_cursor(self, name=None):
+        if name:
+            cursor = self.connection.cursor(name)
+        else:
+            cursor = self.connection.cursor()
         cursor.tzinfo_factory = utc_tzinfo_factory if settings.USE_TZ else None
         return cursor
+
+    def chunked_cursor(self):
+        self._named_cursor_idx += 1
+        return self._cursor('_django_server_side_cursor_{}'.format(self._named_cursor_idx))
 
     def _set_autocommit(self, autocommit):
         with self.wrap_database_errors:
